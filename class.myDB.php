@@ -26,24 +26,27 @@ $result_array = $db->fetch_array($sql);
 */
 
 class myDB extends MySQLi {
-	public $host = '';
-	public $user = '';
-	public $password = '';
-	public $database = '';
-	public $connection = '';
+	private $host = "localhost";
+	private $db_name = "";
+	private $username = "root";
+	private $password = "";
+	public $conn;
 	
-	public function __construct($host,$user,$password,$database) {
-		$this->host = $host;
-		$this->user = $user;
-		$this->password = $password;
-		$this->database = $database;
+	public function __construct($host='',$username='',$password='',$db_name='') {
+		$this->host = ($host == '') ? $this->host : $host;
+		$this->username = ($username == '') ? $this->username : $username;
+		$this->password = ($password == '') ? $this->password : $password;
+		$this->db_name =($db_name == '') ? $this->db_name : $db_name;
 		$this->connect_me();
+		return;
 	}
 	
 	private function connect_me() {
-		$this->connection = $this-> connect($this->host,$this->user,$this->password,$this->database);
+		$this->conn = null;
+		$this->conn = $this->connect($this->host,$this->username,$this->password,$this->db_name);
 		if( $this->connect_error )
-		die($this->connect_error);
+			die($this->connect_error);
+		return;
 	}
 	
 	// returns all results as an array
