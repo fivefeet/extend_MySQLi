@@ -2,17 +2,17 @@
 /*
 * extend_MySQLi - Used to extend MySQLi functions.
 * Copyright (C) 2018  Christopher D TerVree
-* 
+*
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
 * (at your option) any later version.
-* 
+*
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU General Public License for more details.
-* 
+*
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -31,7 +31,7 @@ class myDB extends MySQLi {
 	private $username = "root";
 	private $password = "";
 	public $conn;
-	
+
 	public function __construct($host='',$username='',$password='',$db_name='') {
 		$this->host = ($host == '') ? $this->host : $host;
 		$this->username = ($username == '') ? $this->username : $username;
@@ -40,7 +40,7 @@ class myDB extends MySQLi {
 		$this->connect_me();
 		return;
 	}
-	
+
 	private function connect_me() {
 		$this->conn = null;
 		$this->conn = $this->connect($this->host,$this->username,$this->password,$this->db_name);
@@ -48,7 +48,7 @@ class myDB extends MySQLi {
 			die($this->connect_error);
 		return;
 	}
-	
+
 	// returns all results as an array
 	public function fetch_array($sql) {
 		$result = $this->query($sql);
@@ -65,7 +65,7 @@ class myDB extends MySQLi {
 			}
 		}
 	}
-	
+
 	public function query_first($sql) {
 		$result = $this->query($sql);
 		if($this->error) {
@@ -75,6 +75,25 @@ class myDB extends MySQLi {
 			return $row;
 		}
 	}
-	
+
+	public function insert_array($table, $data, $exclude = array()) {
+		$fields = $values = array();
+		if( !is_array($exclude) ) $exclude = array($exclude);
+		
+		foreach( array_keys($data) as $key ) {
+			if( !in_array($key, $exclude) ) {
+				$fields[] = "`$key`";
+				$values[] = "'" . $this->real_escape_string($data[$key]) . "'";
+			}
+		}
+		$fields = implode(",", $fields);
+		$values = implode(",", $values);
+		if( $this->query("INSERT INTO `$table` ($fields) VALUES ($values)") ) {
+			return true;
+		} else {
+			return $this->error;
+		}
+	}
+
 }
 ?>
