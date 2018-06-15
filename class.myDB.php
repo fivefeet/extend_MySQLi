@@ -23,6 +23,9 @@ How to use:
 $db = new myDB($DBHost,$DBUser,$DBPass,$db_name);
 
 $result_array = $db->fetch_array($sql);
+
+$result_insert = $db->insert_array("tbl_name", $data, "id");
+$result_insert = $db->insert_array("tbl_name", $data, array("id","s","e"));
 */
 
 class myDB extends MySQLi {
@@ -42,8 +45,7 @@ class myDB extends MySQLi {
 	}
 
 	private function connect_me() {
-		$this->conn = null;
-		$this->conn = $this->connect($this->host,$this->username,$this->password,$this->db_name);
+		$this->connect($this->host,$this->username,$this->password,$this->db_name);
 		if( $this->connect_error )
 			die($this->connect_error);
 		return;
@@ -66,6 +68,7 @@ class myDB extends MySQLi {
 		}
 	}
 
+	// return first row of query
 	public function query_first($sql) {
 		$result = $this->query($sql);
 		if($this->error) {
@@ -76,6 +79,7 @@ class myDB extends MySQLi {
 		}
 	}
 
+	// insert array into table
 	public function insert_array($table, $data, $exclude = array()) {
 		$fields = $values = array();
 		if( !is_array($exclude) ) $exclude = array($exclude);
@@ -89,9 +93,12 @@ class myDB extends MySQLi {
 		$fields = implode(",", $fields);
 		$values = implode(",", $values);
 		if( $this->query("INSERT INTO `$table` ($fields) VALUES ($values)") ) {
-			return true;
+			return array( "mysql_error" => false,
+				"mysql_insert_id" => $this->insert_id,
+				"mysql_affected_rows" => $this->affected_rows
+			);
 		} else {
-			return $this->error;
+			return array( "mysql_error" => $this->error );
 		}
 	}
 
